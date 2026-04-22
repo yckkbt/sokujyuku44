@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英語自走式学習システム｜Unit 44</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Lato:wght@400;700;900&display=swap');
+  :root {
+    --blue: #1a4fa0; --orange: #e8630a; --light-blue: #e8f0fb; --light-orange: #fff3e8;
+    --green: #1a7a3c; --light-green: #e8f5ee; --gray: #555; --light-gray: #f5f5f5;
+    --border: #ddd; --red: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f2f5; color: #222; font-size: 15px; line-height: 1.7; }
+  .header { background: var(--blue); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .unit-badge { background: var(--orange); color: white; font-family: 'Lato', sans-serif; font-weight: 900; font-size: 22px; width: 48px; height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-title h1 { font-size: 17px; font-weight: 700; }
+  .header-title p { font-size: 12px; opacity: 0.8; margin-top: 1px; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); height: 4px; }
+  .progress-bar-fill { background: var(--orange); height: 4px; transition: width 0.4s ease; width: 0%; }
+  .steps-nav { background: white; border-bottom: 2px solid var(--border); overflow-x: auto; }
+  .steps-nav-inner { max-width: 860px; margin: 0 auto; display: flex; padding: 0 20px; }
+  .step-tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: #888; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; user-select: none; }
+  .step-tab:hover { color: var(--blue); }
+  .step-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+  .step-tab.done { color: var(--green); }
+  .step-tab.done::before { content: '✓ '; font-size: 11px; }
+  .main { max-width: 860px; margin: 0 auto; padding: 24px 20px 60px; }
+  .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--blue); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .step-intro { background: var(--light-blue); border-left: 4px solid var(--blue); border-radius: 6px; padding: 14px 16px; margin-bottom: 18px; font-size: 14px; color: #333; }
+  .step-intro strong { display: block; font-size: 15px; margin-bottom: 4px; color: var(--blue); }
+  .flow-diagram { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 14px 0; font-size: 13px; }
+  .flow-item { background: var(--blue); color: white; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+  .flow-arrow { color: var(--blue); font-weight: 700; }
+  .listen-btn { display: flex; align-items: center; gap: 10px; background: var(--orange); color: white; border: none; border-radius: 8px; padding: 12px 20px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s, transform 0.1s; margin-bottom: 10px; }
+  .listen-btn:hover { background: #c7550a; transform: translateY(-1px); }
+  .done-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: var(--green); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; }
+  .done-btn:hover { background: #145e2d; }
+  .para-number { display: inline-flex; align-items: center; justify-content: center; background: var(--blue); color: white; width: 26px; height: 26px; border-radius: 50%; font-weight: 900; font-family: 'Lato', sans-serif; font-size: 14px; margin-right: 8px; flex-shrink: 0; }
+  .para-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--light-blue); }
+  .para-topic { font-size: 14px; font-weight: 700; color: white; background: var(--blue); padding: 3px 10px; border-radius: 4px; }
+  .english-text { font-family: 'Lato', sans-serif; font-size: 16px; line-height: 1.9; color: #1a1a1a; background: #fafafa; border-radius: 8px; padding: 16px; border: 1px solid #e8eaed; margin-bottom: 14px; }
+  .english-text .idiom { color: var(--orange); font-weight: 700; }
+  .english-text .grammar { color: var(--blue); font-weight: 700; }
+  .japanese-text { font-size: 14px; color: #444; line-height: 1.8; padding: 12px 16px; background: #fffdf5; border-radius: 8px; border-left: 3px solid var(--orange); margin-bottom: 16px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .vocab-item { display: flex; align-items: baseline; gap: 6px; background: var(--light-blue); border-radius: 6px; padding: 8px 12px; font-size: 14px; }
+  .vocab-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--blue); }
+  .vocab-sep { color: #aaa; font-size: 12px; }
+  .vocab-ja { color: #333; font-size: 13px; }
+  .idiom-list { display: flex; flex-direction: column; gap: 6px; }
+  .idiom-item { display: flex; align-items: baseline; gap: 8px; background: var(--light-orange); border-radius: 6px; padding: 8px 12px; font-size: 14px; flex-wrap: wrap; }
+  .idiom-en { font-family: 'Lato', sans-serif; font-weight: 700; color: var(--orange); }
+  .idiom-ja { color: #444; font-size: 13px; }
+  .grammar-box { background: #f0f4ff; border: 1px solid #b8c8f0; border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 14px; }
+  .grammar-box .g-title { font-weight: 700; background: var(--blue); color: white; display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px; }
+  .grammar-box .g-sentence { font-family: 'Lato', sans-serif; font-size: 15px; color: #1a1a1a; margin-bottom: 8px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 3px solid var(--blue); }
+  .grammar-box .g-note { font-size: 13px; color: #555; line-height: 1.7; }
+  .check-box { background: var(--light-green); border: 1px solid #a8d8b8; border-radius: 8px; padding: 14px 16px; margin-top: 14px; }
+  .check-box .check-title { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .check-q { font-size: 14px; color: #333; }
+  .check-a-btn { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid var(--green); color: var(--green); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: all 0.2s; margin-top: 4px; }
+  .check-a-btn:hover { background: var(--green); color: white; }
+  .check-answer { display: none; background: white; border-left: 3px solid var(--green); padding: 10px 14px; border-radius: 6px; font-size: 14px; color: #222; margin-top: 6px; animation: fadeIn 0.3s ease; }
+  .check-answer.visible { display: block; }
+  .check-answer .a-label { color: var(--green); font-weight: 700; margin-right: 4px; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+  .quiz-item { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .quiz-q { font-size: 15px; color: #222; margin-bottom: 14px; font-weight: 500; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-size: 14px; transition: all 0.15s; user-select: none; }
+  .quiz-opt:hover { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.selected { border-color: var(--blue); background: var(--light-blue); }
+  .quiz-opt.correct { border-color: var(--green); background: var(--light-green); }
+  .quiz-opt.wrong { border-color: var(--red); background: #fdecea; }
+  .quiz-opt .opt-letter { width: 26px; height: 26px; border-radius: 50%; background: var(--light-gray); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .quiz-feedback { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; animation: fadeIn 0.3s ease; }
+  .quiz-feedback.correct-fb { background: var(--light-green); color: var(--green); border-left: 3px solid var(--green); display: block; }
+  .quiz-feedback.wrong-fb { background: #fdecea; color: var(--red); border-left: 3px solid var(--red); display: block; }
+  .submit-quiz-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; margin-top: 8px; }
+  .submit-quiz-btn:hover { background: #143d80; }
+  .quiz-result { display: none; background: var(--light-blue); border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; animation: fadeIn 0.4s ease; }
+  .quiz-result .score { font-size: 40px; font-weight: 900; color: var(--blue); font-family: 'Lato', sans-serif; }
+  .quiz-result .score-label { font-size: 14px; color: #666; margin-bottom: 12px; }
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+  .next-step-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: white; border: none; border-radius: 8px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: background 0.2s; width: 100%; margin-top: 8px; }
+  .next-step-btn:hover { background: #143d80; }
+  .completion-banner { background: linear-gradient(135deg, var(--green), #2ecc71); color: white; border-radius: 12px; padding: 28px; text-align: center; margin-top: 20px; }
+  .completion-banner h2 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+  .completion-banner p { font-size: 14px; opacity: 0.9; }
+  @media (max-width: 600px) { .vocab-grid { grid-template-columns: 1fr 1fr; } .english-text { font-size: 15px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="unit-badge">44</div>
+    <div class="header-title">
+      <h1>Multilingualism vs. Monolingualism</h1>
+      <p>マルチリンガルとモノリンガル・220 words</p>
+    </div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+</div>
+
+<div class="steps-nav">
+  <div class="steps-nav-inner">
+    <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
+    <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
+    <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-section active" id="step0">
+    <div class="card">
+      <div class="card-title"><span>🔊</span> Step 1｜通しリスニング</div>
+      <div class="step-intro">
+        <strong>最初は本文を見ないで通して聞いてみましょう</strong>
+        下の流れを意識しながら聞いてみよう。
+      </div>
+      <div class="flow-diagram">
+        <div class="flow-item">マルチリンガルとは</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">多言語の利点</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">モノリンガルの不利</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">マルチリンガルへの道</div>
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（1回目）</button>
+      <audio id="audioPlayer" src="sokujukure130_eibun44.mp3" style="width:100%; margin-bottom:14px; display:block; border-radius:8px;"></audio>
+      <div class="step-intro" style="background:#fff3e8; border-left-color: var(--orange);">
+        <strong>次は本文を見ながら通して聞いてみましょう</strong>
+        内容を意識しながら聞こう。英文と日本語訳は Step 2 で確認できます。
+      </div>
+      <button class="listen-btn" onclick="playAudio()">🔊 音声を再生する（2回目）</button>
+      <br>
+      <button class="done-btn" onclick="completeStep(0)">✓ リスニング完了 → 次へ</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-section" id="step1">
+
+    <!-- Para 1 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">1</span>
+        <span class="para-topic">マルチリンガルとは何か</span>
+      </div>
+      <div class="english-text">
+        Multilingual is a term <span class="idiom">applied to those who</span> speak two or more languages. By most estimates, <span class="idiom">not less than</span> half of the world's population is either bilingual or multilingual. <span class="idiom">It is said that</span> the figure could be up to 60 to 75 percent. Some countries have multilingual people within their own borders. For example, South Africa has 11 official languages.
+      </div>
+      <div class="japanese-text">
+        マルチリンガルは、2つ以上の言語を話す人に当てはまる言葉である。ほぼどの推計によっても、世界人口の少なくとも半数がバイリンガルかマルチリンガルだという。その数は、最大で60%から75%にもなると言われている。自国内の国民がマルチリンガルだという国もある。例えば、南アフリカには11の公用語がある。
+      </div>
+      <div class="section-label">重要単語</div>
+      <div class="vocab-grid">
+        <div class="vocab-item"><span class="vocab-en">multilingual</span><span class="vocab-sep">｜</span><span class="vocab-ja">多数の言語を話せる</span></div>
+        <div class="vocab-item"><span class="vocab-en">estimate</span><span class="vocab-sep">｜</span><span class="vocab-ja">見積もり・推定</span></div>
+        <div class="vocab-item"><span class="vocab-en">border</span><span class="vocab-sep">｜</span><span class="vocab-ja">国境・境界</span></div>
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">apply to ~</span><span class="idiom-ja">〜に当てはまる</span></div>
+        <div class="idiom-item"><span class="idiom-en">those who ...</span><span class="idiom-ja">…する人々</span></div>
+        <div class="idiom-item"><span class="idiom-en">not less than ~</span><span class="idiom-ja">少なくとも〜</span></div>
+        <div class="idiom-item"><span class="idiom-en">it is said that ...</span><span class="idiom-ja">…と言われている</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法①｜過去分詞による後置修飾（applied to those who）</div>
+        <div class="g-sentence">Multilingual is a term <u>applied to those who</u> speak two or more languages.</div>
+        <div class="g-note"><strong>applied to those who ～</strong> が過去分詞句として <strong>a term</strong> を後置修飾している。「2つ以上の言語を話す人に当てはまる言葉」という意味。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q1</strong> 世界人口のうちマルチリンガルはどのくらいいるか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>少なくとも半数、最大で60〜75%と言われている。</div>
+      </div>
+    </div>
+
+    <!-- Para 2 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">2</span>
+        <span class="para-topic">多言語を話せることの利点</span>
+      </div>
+      <div class="english-text">
+        Having another language <span class="idiom">at our disposal</span> has many benefits. There are social, psychological, and lifestyle advantages. <span class="idiom">For one thing</span>, speaking more than one language allows you to <span class="idiom">make friends with</span> more people. It also lets you <span class="idiom">adapt to</span> different environments more quickly if you move or travel. And research shows that multilingual people do better on mental skill tests.
+      </div>
+      <div class="japanese-text">
+        （母語とは）別の言語を思い通りにできることには多くの利点がある。社会的にも心理的にも、そして生活の上でもアドバンテージがある。1つには、2つ以上の言語が話せれば、より多くの人と友達になることが可能になる。それはまた、どこかへ引っ越したり旅行したりする時に、より速く異なる環境に適応することも可能にしてくれる。さらに、マルチリンガルの人たちはメンタルスキルの試験でより優れた結果を出すことが研究によってわかっている。
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">at one's disposal</span><span class="idiom-ja">〜の思うままに；自由に使える</span></div>
+        <div class="idiom-item"><span class="idiom-en">for one thing ~</span><span class="idiom-ja">（理由などを挙げて）1つには〜</span></div>
+        <div class="idiom-item"><span class="idiom-en">make friends with ~</span><span class="idiom-ja">〜と友達になる；〜と親しくなる</span></div>
+        <div class="idiom-item"><span class="idiom-en">adapt to ~</span><span class="idiom-ja">〜に適応する；〜に順応する</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法②｜無生物主語（allow / let）</div>
+        <div class="g-sentence">speaking more than one language <u>allows you to</u> make friends …<br>It also <u>lets you</u> adapt to different environments …</div>
+        <div class="g-note">無生物主語の文が2つ連続。<strong>allow O to do</strong> も <strong>let O do</strong> も「SのおかげでOは…することができる」と訳すと自然な日本語になる。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q2</strong> 多言語を話せることの利点を2つ挙げよ。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>①より多くの人と友達になれる　②異なる環境により速く適応できる（＋メンタルスキルテストの成績が良い）</div>
+      </div>
+    </div>
+
+    <!-- Para 3 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">3</span>
+        <span class="para-topic">モノリンガルの不利と企業の要求</span>
+      </div>
+      <div class="english-text">
+        <span class="idiom">To put it another way</span>, being monolingual can put you at a disadvantage. <span class="idiom">Now that</span> lots of business is conducted internationally, many companies are <span class="idiom">searching for</span> personnel who <span class="idiom">have a good command of</span> more than one language, and they say multilingual workers <span class="idiom">are preferable to</span> monolingual ones.
+      </div>
+      <div class="japanese-text">
+        言い方を変えれば、モノリンガルであることで不利益を被る可能性があるということだ。今や多くのビジネスがグローバルに行われ、多くの企業が2つ以上の言語を使いこなせる人材を求めており、そうした企業は、マルチリンガルの働き手の方がモノリンガルより望ましいと考えている。
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">to put it another way</span><span class="idiom-ja">別の言い方をすれば</span></div>
+        <div class="idiom-item"><span class="idiom-en">now (that) ...</span><span class="idiom-ja">今や…なので；…であるからには</span></div>
+        <div class="idiom-item"><span class="idiom-en">search for ~</span><span class="idiom-ja">〜を捜し求める</span></div>
+        <div class="idiom-item"><span class="idiom-en">have a good command of ~</span><span class="idiom-ja">〜を使いこなせる；〜（言語など）に堪能である</span></div>
+        <div class="idiom-item"><span class="idiom-en">be preferable to ~</span><span class="idiom-ja">〜より望ましい</span></div>
+      </div>
+      <div class="section-label">文法・構造</div>
+      <div class="grammar-box">
+        <div class="g-title">文法③｜they say S + V（名詞節）</div>
+        <div class="g-sentence">they say <u>multilingual workers are preferable to monolingual ones</u></div>
+        <div class="g-note"><strong>say</strong> の目的語が <strong>multilingual workers are preferable to monolingual ones</strong> という名詞節になっている。<strong>ones</strong> は workers を指している。</div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q3</strong> 企業はどんな人材を求めているか。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>2つ以上の言語を使いこなせる、マルチリンガルの人材。</div>
+      </div>
+    </div>
+
+    <!-- Para 4 -->
+    <div class="card">
+      <div class="para-title-row">
+        <span class="para-number">4</span>
+        <span class="para-topic">マルチリンガルへの道</span>
+      </div>
+      <div class="english-text">
+        The key to becoming multilingual is to start from a young age. But adults can also <span class="idiom">become acquainted with</span> a new language. In the beginning, you'll have to <span class="idiom">look up</span> many words <span class="idiom">in the dictionary</span>. But if you <span class="idiom">keep at</span> it, you'll <span class="idiom">make progress in</span> your language ability. Then you can call yourself multilingual!
+      </div>
+      <div class="japanese-text">
+        マルチリンガルになるためのカギは、若い頃から始めることだ。だが、大人でも新しい言語に精通するようになることは可能だ。初めのうちは、たくさんの単語を辞書で調べなければならないだろう。でもそれを根気よく続けていけば、きっと言語能力は向上する。そうすれば、あなたも晴れてマルチリンガルを名乗ることができる！
+      </div>
+      <div class="section-label">重要イディオム・表現</div>
+      <div class="idiom-list">
+        <div class="idiom-item"><span class="idiom-en">become acquainted with ~</span><span class="idiom-ja">〜を熟知して；〜と知り合いで</span></div>
+        <div class="idiom-item"><span class="idiom-en">look up ~ (in the dictionary)</span><span class="idiom-ja">〜を（辞書で）調べる</span></div>
+        <div class="idiom-item"><span class="idiom-en">keep at ~</span><span class="idiom-ja">〜を根気よく続ける</span></div>
+        <div class="idiom-item"><span class="idiom-en">make progress (in ~)</span><span class="idiom-ja">（〜において）進歩する</span></div>
+      </div>
+      <div class="check-box">
+        <div class="check-title">✅ 理解チェック</div>
+        <div class="check-q"><strong>Q4</strong> マルチリンガルになるためのカギは何か。</div>
+        <button class="check-a-btn" onclick="toggleAnswer(this)">▼ 答えを見る</button>
+        <div class="check-answer"><span class="a-label">→</span>若い頃から始めること。大人でも根気よく続ければ進歩できる。</div>
+      </div>
+    </div>
+
+    <div class="card" style="background: var(--light-blue);">
+      <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:10px;">【15字要約】</div>
+      <div style="font-size:20px; font-weight:900; color:#222; letter-spacing:0.05em;">多言語習得が現代の強み</div>
+    </div>
+
+    <button class="next-step-btn" onclick="completeStep(1)">Step 3｜確認クイズへ →</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-section" id="step2">
+    <div class="card">
+      <div class="card-title"><span>📝</span> Step 3｜確認クイズ</div>
+      <p style="font-size:14px; color:#666; margin-bottom:20px;">本文の内容を確認しましょう。各問題の選択肢を選んでから「採点する」を押してね。</p>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q1.</strong> According to most estimates, how many people in the world are bilingual or multilingual?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">A</div> Less than 25% of the world's population.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">B</div> Exactly 50% of the world's population.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="true"><div class="opt-letter">C</div> Not less than half of the world's population.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q1')" data-correct="false"><div class="opt-letter">D</div> About 30% of the world's population.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q1"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q2.</strong> What advantage does speaking more than one language give you when you travel?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">A</div> You can earn more money abroad.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="true"><div class="opt-letter">B</div> You can adapt to different environments more quickly.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">C</div> You can avoid needing a dictionary.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q2')" data-correct="false"><div class="opt-letter">D</div> You become better at mental skill tests automatically.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q2"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q3.</strong> 次のイディオムの意味として正しいものを選べ。<br><br><em>have a good command of ~</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">A</div> 〜を捜し求める</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">B</div> 〜に適応する</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="true"><div class="opt-letter">C</div> 〜を使いこなせる；〜に堪能である</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q3')" data-correct="false"><div class="opt-letter">D</div> 〜より望ましい</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q3"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q4.</strong> What does the text say about adults learning a new language?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">A</div> It is impossible for adults to become multilingual.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">B</div> Adults should give up and focus on other skills.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="true"><div class="opt-letter">C</div> Adults can also become acquainted with a new language if they keep at it.</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q4')" data-correct="false"><div class="opt-letter">D</div> Adults learn languages faster than children.</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q4"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><strong>Q5.</strong> 空欄に入る最も適切な語を選べ。<br><br><em>______ that lots of business is conducted internationally, companies search for multilingual workers.</em></div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">A</div> Despite</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="true"><div class="opt-letter">B</div> Now</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">C</div> Although</div>
+          <div class="quiz-opt" onclick="selectOpt(this,'q5')" data-correct="false"><div class="opt-letter">D</div> Unless</div>
+        </div>
+        <div class="quiz-feedback" id="fb-q5"></div>
+      </div>
+
+      <button class="submit-quiz-btn" onclick="submitQuiz()">採点する</button>
+
+      <div class="quiz-result" id="quizResult">
+        <div class="score" id="scoreNum">0/5</div>
+        <div class="score-label">正解数</div>
+        <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
+      </div>
+
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-section" id="step3">
+    <div class="card">
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
+      <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
+        <div style="font-size:20px; font-weight:900; color:#222;">多言語習得が現代の強み</div>
+      </div>
+      <div class="step-intro">
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">17</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
+      </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+    </div>
+    <div class="completion-banner" id="completionBanner" style="display:none;">
+      <h2>🎉 Unit 44 完了！</h2>
+      <p>お疲れ様でした。マルチリンガルとモノリンガルについて学習しました。<br>次のユニットへ進みましょう！</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const stepDone=[false,false,false,false];
+  const quizAnswers={q1:null,q2:null,q3:null,q4:null,q5:null};
+  const correctAnswers={q1:false,q2:false,q3:false,q4:false,q5:false};
+
+  function goToStep(n){
+    document.querySelectorAll('.step-section').forEach((s,i)=>s.classList.toggle('active',i===n));
+    document.querySelectorAll('.step-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  }
+  function completeStep(n){
+    stepDone[n]=true;
+    const tab=document.getElementById('tab'+n);
+    tab.classList.add('done');tab.classList.remove('active');
+    document.getElementById('progressBar').style.width=(stepDone.filter(Boolean).length/4*100)+'%';
+    if(n<3)goToStep(n+1);
+    else{document.getElementById('completionBanner').style.display='block';document.getElementById('completionBanner').scrollIntoView({behavior:'smooth'});}
+  }
+  function toggleAnswer(btn){
+    const a=btn.nextElementSibling;
+    const v=a.classList.toggle('visible');
+    btn.textContent=v?'▲ 閉じる':'▼ 答えを見る';
+  }
+  function playAudio(){
+    const audio=document.getElementById('audioPlayer');
+    if(audio.paused){audio.play();}else{audio.pause();audio.currentTime=0;}
+  }
+  function selectOpt(el,qid){
+    el.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');quizAnswers[qid]=el;correctAnswers[qid]=el.dataset.correct==='true';
+  }
+  function submitQuiz(){
+    const questions=['q1','q2','q3','q4','q5'];
+    let score=0;
+    const feedbacks={
+      q1:{correct:'正解！「not less than half of the world\'s population」が根拠です。',wrong:'不正解。Para 1「not less than half」を確認しよう。'},
+      q2:{correct:'正解！「adapt to different environments more quickly if you move or travel」が根拠です。',wrong:'不正解。Para 2「adapt to different environments」を見直そう。'},
+      q3:{correct:'正解！have a good command of は「〜を使いこなせる；〜に堪能である」という意味です。',wrong:'不正解。Para 3のイディオム一覧を見直してみよう。'},
+      q4:{correct:'正解！「adults can also become acquainted with a new language」が根拠です。',wrong:'不正解。Para 4「adults can also become acquainted with」を確認しよう。'},
+      q5:{correct:'正解！now that は「今や…なので；…であるからには」という意味です。',wrong:'不正解。Para 3のイディオム「now (that)」を確認しよう。'},
+    };
+    questions.forEach(q=>{
+      const fb=document.getElementById('fb-'+q);
+      const selected=quizAnswers[q];
+      if(!selected){fb.className='quiz-feedback wrong-fb';fb.textContent='未選択。必ず選んでから採点してね。';return;}
+      const isCorrect=correctAnswers[q];
+      if(isCorrect)score++;
+      selected.classList.remove('selected');
+      selected.classList.add(isCorrect?'correct':'wrong');
+      if(!isCorrect)selected.closest('.quiz-item').querySelectorAll('.quiz-opt').forEach(o=>{if(o.dataset.correct==='true')o.classList.add('correct');});
+      fb.className='quiz-feedback '+(isCorrect?'correct-fb':'wrong-fb');
+      fb.textContent=(isCorrect?'✓ ':'✗ ')+feedbacks[q][isCorrect?'correct':'wrong'];
+    });
+    const result=document.getElementById('quizResult');
+    result.style.display='block';
+    document.getElementById('scoreNum').textContent=score+'/5';
+    const msgs=['💪 もう一度本文を読み直してチャレンジしてみよう！','💪 もう一度本文を読み直してチャレンジしてみよう！','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','📖 まずまずです。間違えた問題の該当パラグラフを見直そう。','👏 よくできました！あと一息！','🎉 満点！素晴らしい理解力です！'];
+    document.getElementById('scoreMsg').textContent=msgs[score];
+    document.getElementById('toStep4Btn').style.display='flex';
+    result.scrollIntoView({behavior:'smooth'});
+  }
+
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'apply to ~',ja:'〜に当てはまる'},
+    {en:'those who ...',ja:'…する人々'},
+    {en:'not less than ~',ja:'少なくとも〜'},
+    {en:'it is said that ...',ja:'…と言われている'},
+    {en:'at one\'s disposal',ja:'〜の思うままに；自由に使える'},
+    {en:'for one thing ~',ja:'（理由などを挙げて）1つには〜'},
+    {en:'make friends with ~',ja:'〜と友達になる；〜と親しくなる'},
+    {en:'adapt to ~',ja:'〜に適応する；〜に順応する'},
+    {en:'to put it another way',ja:'別の言い方をすれば'},
+    {en:'now (that) ...',ja:'今や…なので；…であるからには'},
+    {en:'search for ~',ja:'〜を捜し求める'},
+    {en:'have a good command of ~',ja:'〜を使いこなせる；〜に堪能である'},
+    {en:'be preferable to ~',ja:'〜より望ましい'},
+    {en:'become acquainted with ~',ja:'〜を熟知して；〜と知り合いで'},
+    {en:'look up ~ (in the dictionary)',ja:'〜を（辞書で）調べる'},
+    {en:'keep at ~',ja:'〜を根気よく続ける'},
+    {en:'make progress (in ~)',ja:'（〜において）進歩する'},
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
+</script>
+
+</body>
+</html>
